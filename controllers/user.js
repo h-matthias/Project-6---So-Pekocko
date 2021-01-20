@@ -30,10 +30,10 @@ exports.login = (req, res, next) => {
                         return res.status(401).json({error : "mot de passe incorect"})
                     }
                     res.status(200).json({
-                        userId: user.userId,
+                        userId: user._id,
                         token: jwt.sign(
-                            { userId : user.userId },
-                            process.env.JWT,
+                            { userId : user._id },
+                            process.env.JWT_PASS,
                             { expiresIn: "24h" }
                         )
                     });

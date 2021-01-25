@@ -24,6 +24,7 @@ app.use((req, res, next) => {
 
 app.use(bodyParser.json());
 
+// permet d'afficher les images
 app.use("/images", express.static(path.join(__dirname, "images")));
 
 

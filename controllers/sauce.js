@@ -1,24 +1,26 @@
 const Sauce = require("../models/Sauce");
 const fs = require("fs");
 
+/** Retourne toute les sauce **/
 exports.getAllSauce = (req, res, next) => {
     Sauce.find()
     .then(sauce => res.status(200).json(sauce))
     .catch(error => res.status(400).json({error}));
 };
 
+/** retourne une seule sauce **/
 exports.getOneSauce = (req, res, next) => {
     Sauce.findOne({_id : req.params.id})
     .then(sauce => res.status(200).json(sauce))
     .catch(sauce => res.status(400).json({error}));
 };
-
+/** crée une sauce **/
 exports.createSauce = (req, res, next) => {
     const sauceObject = JSON.parse(req.body.sauce)
-    delete sauceObject._id;
+    delete sauceObject._id;//supprmie l'id renvoyer par le front pour le créer via mongoDB
     const sauce = new Sauce({
-        ...sauceObject,
-        imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`,
+        ...sauceObject,//copie directement les champ formulaire dans les champs du schema sauce
+        imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`, //crée une addresse URL dynamique
         likes: 0,
         dislikes: 0,
         usersLiked: [],
@@ -29,17 +31,22 @@ exports.createSauce = (req, res, next) => {
     .catch(() =>  res.status(400).json({error}))
 };
 
+/** Modification sauce  
+ *  si image modifié on parse le json pour recuper et modifier le champs et l'url de l'image
+ *  sinon modifi que la requete du body sans tenir compte de l'image
+ ***/
 exports.modifySauce = (req, res, next) => {
-    const sauceObject = req.file ?
-    {
-        ...JSON.parse(req.body.sauce),
-        imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
-    } : { ...req.body};
-    Sauce.updateOne({ _id: req.params.id }, { ...sauceObject, _id: req.params.id})
-    .then(() => res.status(200).json({message: "Sauce Modifié"}))
-    .catch(() => res.status(200).json({error}));
+            const sauceObject = req.file ?
+            {
+                ...JSON.parse(req.body.sauce),
+                imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
+            } : { ...req.body};
+                Sauce.updateOne({ _id: req.params.id }, { ...sauceObject, _id: req.params.id})
+                .then(() => res.status(200).json({message: "Sauce Modifié"}))
+                .catch(error => res.status(400).json({ error })); 
 };
 
+/** Supprime la sauce et aussi l'image associer **/
 exports.deleteSauce = (req, res, next) => {
     Sauce.findOne({_id: req.params.id})
         .then(sauce => {
@@ -53,6 +60,14 @@ exports.deleteSauce = (req, res, next) => {
         .catch(error => res.status(500).json({ error }));
 };
 
+/***
+ * function pour aimer ou ne pas aimer une sauce et d'annuler le choix
+ *  verifie si l'utilisateur aime ou pas la sauce
+ *  si j'aime = 1 , on ajoute userId au tableau userLike et incrément likes.
+ *  si j'aime = -1 ,  on ajoute userId au tableau userDislike et incrément dislikes
+ *  si j'aime = 0, soit l'utilisateur aimait donc retire du tableau userLike et decrément like
+ *                 soit n'aimait pas donc retire du tableau userDislike et decrément dislike
+ ***/
 exports.likedSauce =(req, res, next) => {
     const like = req.body.like;
     const userId = req.body.userId;

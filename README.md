@@ -23,6 +23,8 @@ Projet réaliser avec
 
 ### Information complémentaire
 
+Veuillez créer un fichier `.env` et ajouter les informations de connection de MongoDB et un chaîne secret pour le Token comme dans `.env.exemple`
+
 L'API fonctionne avec la partie [frontend](https://github.com/OpenClassrooms-Student-Center/dwj-projet6.git) à cloner.
 
 Suivre le Readme de ce repositorie pour exécuter la partie frontend et utiliser l'API.

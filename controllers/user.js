@@ -3,13 +3,15 @@ require ("dotenv").config();
 const bcrypt = require("bcrypt");
 const User = require("../models/User");
 const jwt = require("jsonwebtoken");
+const mask = require("../function/mask");
 
 /** inscription de l'utilisateur avec cryptage du pass **/
 exports.signup = (req, res, next) => {
+    let mailRev = mask.maskEmail(req.body.email);
     bcrypt.hash (req.body.password, 10)
     .then(hash => {
         const user = new User({
-            email: req.body.email,
+            email: mailRev,
             password: hash
         });
         user.save()
@@ -21,10 +23,11 @@ exports.signup = (req, res, next) => {
 
 /** connection de l'utilisateur avec authentification token **/
 exports.login = (req, res, next) => {
-    User.findOne({ email: req.body.email})
+    let mail = mask.maskEmail(req.body.email)
+    User.findOne({ email: mail})
         .then(user => {
             if (!user){
-                return res.status(401).json({error : "utilisateur non trouvé"})
+                return res.status(404).json({error : "utilisateur non trouvé"})
             }
             bcrypt.compare(req.body.password, user.password)
                 .then(valid => {

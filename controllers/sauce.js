@@ -12,7 +12,7 @@ exports.getAllSauce = (req, res, next) => {
 exports.getOneSauce = (req, res, next) => {
     Sauce.findOne({_id : req.params.id})
     .then(sauce => res.status(200).json(sauce))
-    .catch(sauce => res.status(400).json({error}));
+    .catch(sauce => res.status(404).json({error}));
 };
 /** crée une sauce **/
 exports.createSauce = (req, res, next) => {
